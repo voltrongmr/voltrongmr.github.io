@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="favicon (1).ico">
-    <title>BORED - Modern Hub</title>
+    <title>Home</title>
     
     <!-- Modern Icons via CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -113,8 +113,8 @@
             background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             background-size: 200% 200%;
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
             animation: gradientMove 4s ease-in-out infinite, titleBounce 3s ease-in-out infinite;
             text-align: center;
@@ -284,6 +284,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
             animation: fadeInUp 1s ease-out;
@@ -456,7 +457,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 5000;
+            z-index: 2147483647;
             transition: all 0.5s ease;
         }
 
@@ -622,6 +623,107 @@
 
         .fullscreen-overlay.show {
             display: flex;
+        }
+
+        .fullscreen-overlay.slope-mode {
+            background: #2a2a2a;
+        }
+
+        .fullscreen-overlay.slope-mode .fullscreen-iframe {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60vw;
+            height: 60vh;
+            max-width: 800px;
+            max-height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--primary);
+        }
+
+        .fullscreen-overlay.slope-mode .fullscreen-header {
+            background: transparent;
+            border-bottom: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        /* Fullscreen teacher button overlay */
+        .fullscreen-teacher-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .fullscreen-teacher-btn-overlay {
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .fullscreen-teacher-btn-overlay:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 0, 0, 0.9);
+            border-color: #ffff00;
+            box-shadow: 0 0 15px #ffff00, 0 0 30px #ffff00, 0 8px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Data Management Controls */
+        .data-management-controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .data-clear-btn,
+        .data-export-btn,
+        .data-import-btn {
+            padding: 0.5rem 0.75rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .data-clear-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .data-export-btn:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .data-import-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .fullscreen-header {
@@ -1701,6 +1803,37 @@
 
         // Teacher Mode
         function toggleTeacherMode() {
+            // Check if we're in any kind of fullscreen mode first
+            const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+            const gameModal = document.getElementById('game-modal');
+            const isInNativeFullscreen = document.fullscreenElement ||
+                                       document.webkitFullscreenElement ||
+                                       document.mozFullScreenElement ||
+                                       document.msFullscreenElement;
+            
+            // If in native fullscreen, exit it first to show our overlay
+            if (isInNativeFullscreen) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+                // Wait a moment for fullscreen to exit, then show overlay
+                setTimeout(() => {
+                    showRedirectOverlay();
+                }, 100);
+            } else {
+                // Not in native fullscreen, show overlay immediately
+                showRedirectOverlay();
+            }
+        }
+
+        function showRedirectOverlay() {
             // Show redirecting overlay
             const redirectingOverlay = document.getElementById('redirecting-overlay');
             redirectingOverlay.classList.add('show');
@@ -1710,11 +1843,22 @@
             const passcodeScreen = document.getElementById('passcode-screen');
             const particleCanvas = document.getElementById('particle-canvas');
             const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+            const gameModal = document.getElementById('game-modal');
             
-            // If in fullscreen mode, blur the fullscreen overlay
-            if (fullscreenOverlay.classList.contains('show')) {
-                fullscreenOverlay.style.filter = 'blur(10px)';
-                fullscreenOverlay.style.transition = 'filter 0.5s ease';
+            // Check if we're in any other kind of fullscreen mode
+            const isInCustomFullscreen = fullscreenOverlay.classList.contains('show') || 
+                                       gameModal.classList.contains('show');
+            
+            if (isInCustomFullscreen) {
+                // If in custom fullscreen mode, blur the fullscreen overlay or game modal
+                if (fullscreenOverlay.classList.contains('show')) {
+                    fullscreenOverlay.style.filter = 'blur(10px)';
+                    fullscreenOverlay.style.transition = 'filter 0.5s ease';
+                }
+                if (gameModal.classList.contains('show')) {
+                    gameModal.style.filter = 'blur(10px)';
+                    gameModal.style.transition = 'filter 0.5s ease';
+                }
             } else {
                 // Otherwise blur the normal content
                 if (content) content.style.filter = 'blur(10px)';
@@ -1795,8 +1939,21 @@
             const fullscreenIframe = document.getElementById('fullscreen-iframe');
             
             fullscreenOverlay.classList.remove('show');
+            fullscreenOverlay.classList.remove('slope-mode');
             fullscreenIframe.src = '';
             showNotification('Exited fullscreen mode', 'info');
+        }
+
+        function enterSlopeFullscreen(gameFile, title) {
+            const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+            const fullscreenIframe = document.getElementById('fullscreen-iframe');
+            const fullscreenTitle = document.getElementById('fullscreen-title');
+            
+            fullscreenIframe.src = gameFile;
+            fullscreenTitle.textContent = title;
+            fullscreenOverlay.classList.add('show');
+            fullscreenOverlay.classList.add('slope-mode');
+            showNotification('Slope entered corner fullscreen mode', 'success');
         }
 
         // Fullscreen button event listeners
@@ -1827,6 +1984,62 @@
                 }
             }
         });
+
+        // Global keyboard listener for fullscreen mode
+        // This ensures teacher button works even when games are in fullscreen
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === ';') {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleTeacherMode();
+            }
+        }, true);
+
+        // Listen for fullscreen changes to handle teacher button in fullscreen
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            const isFullscreen = document.fullscreenElement ||
+                               document.webkitFullscreenElement ||
+                               document.mozFullScreenElement ||
+                               document.msFullscreenElement;
+            
+            if (isFullscreen) {
+                // Add a teacher button overlay to the fullscreen element
+                addTeacherButtonToFullscreen();
+            } else {
+                // Remove the teacher button overlay
+                removeTeacherButtonFromFullscreen();
+            }
+        }
+
+        function addTeacherButtonToFullscreen() {
+            const fullscreenElement = document.fullscreenElement ||
+                                    document.webkitFullscreenElement ||
+                                    document.mozFullScreenElement ||
+                                    document.msFullscreenElement;
+            
+            if (fullscreenElement && !fullscreenElement.querySelector('.fullscreen-teacher-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'fullscreen-teacher-overlay';
+                overlay.innerHTML = `
+                    <button class="fullscreen-teacher-btn-overlay" onclick="toggleTeacherMode()">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Teacher</span>
+                        <span class="shortcut">Ctrl + ;</span>
+                    </button>
+                `;
+                fullscreenElement.appendChild(overlay);
+            }
+        }
+
+        function removeTeacherButtonFromFullscreen() {
+            const overlays = document.querySelectorAll('.fullscreen-teacher-overlay');
+            overlays.forEach(overlay => overlay.remove());
+        }
 
         // Logo click
         document.getElementById('logo').addEventListener('click', () => {
@@ -1878,22 +2091,37 @@
         gameFullscreenBtn.addEventListener('click', () => {
             const gameIframe = document.getElementById('game-iframe');
             const gameModalTitle = document.getElementById('game-modal-title');
+            const gameFile = gameIframe.src;
             
-            if (gameIframe.requestFullscreen) {
-                gameIframe.requestFullscreen();
-            } else if (gameIframe.webkitRequestFullscreen) {
-                gameIframe.webkitRequestFullscreen();
-            } else if (gameIframe.msRequestFullscreen) {
-                gameIframe.msRequestFullscreen();
+            // Check if it's the slope game and use custom fullscreen
+            if (gameFile.includes('slope/index.html')) {
+                enterSlopeFullscreen(gameFile, gameModalTitle.textContent);
+            } else {
+                // Use native fullscreen for other games
+                if (gameIframe.requestFullscreen) {
+                    gameIframe.requestFullscreen();
+                } else if (gameIframe.webkitRequestFullscreen) {
+                    gameIframe.webkitRequestFullscreen();
+                } else if (gameIframe.msRequestFullscreen) {
+                    gameIframe.msRequestFullscreen();
+                }
+                showNotification('Game entered fullscreen mode', 'success');
             }
-            
-            showNotification('Game entered fullscreen mode', 'success');
         });
 
         function openGameModal(gameFile, title) {
             gameModalTitle.textContent = title;
             gameIframe.src = gameFile;
             gameModal.classList.add('show');
+            
+            // Hide fullscreen button for slope game
+            const fullscreenBtn = document.getElementById('game-fullscreen-btn');
+            if (gameFile.includes('slope/index.html')) {
+                fullscreenBtn.style.display = 'none';
+            } else {
+                fullscreenBtn.style.display = 'flex';
+            }
+            
             showNotification(`Opening ${title}...`, 'success');
         }
 
@@ -1903,8 +2131,310 @@
             showNotification('Game closed', 'info');
         }
 
+        // Game Data Storage System
+        class GameDataManager {
+            constructor() {
+                this.storageKey = 'bored_game_data';
+                this.gameData = this.loadGameData();
+            }
+
+            loadGameData() {
+                try {
+                    const data = localStorage.getItem(this.storageKey);
+                    return data ? JSON.parse(data) : {};
+                } catch (error) {
+                    console.warn('Failed to load game data:', error);
+                    return {};
+                }
+            }
+
+            saveGameData() {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.gameData));
+                } catch (error) {
+                    console.warn('Failed to save game data:', error);
+                }
+            }
+
+            getGameData(gameId) {
+                return this.gameData[gameId] || {};
+            }
+
+            setGameData(gameId, data) {
+                this.gameData[gameId] = { ...this.gameData[gameId], ...data };
+                this.saveGameData();
+            }
+
+            clearGameData(gameId) {
+                if (gameId) {
+                    delete this.gameData[gameId];
+                } else {
+                    this.gameData = {};
+                }
+                this.saveGameData();
+            }
+
+            // Inject data persistence script into game iframe
+            injectDataPersistence(iframe, gameId) {
+                if (!iframe || !iframe.contentWindow) return;
+
+                const script = `
+                    (function() {
+                        const gameId = '${gameId}';
+                        const storageKey = 'bored_game_data';
+                        
+                        // Function to get game data from parent
+                        function getGameData() {
+                            try {
+                                const data = localStorage.getItem(storageKey);
+                                const allData = data ? JSON.parse(data) : {};
+                                return allData[gameId] || {};
+                            } catch (error) {
+                                console.warn('Failed to get game data:', error);
+                                return {};
+                            }
+                        }
+                        
+                        // Function to save game data to parent
+                        function saveGameData(data) {
+                            try {
+                                const existingData = localStorage.getItem(storageKey);
+                                const allData = existingData ? JSON.parse(existingData) : {};
+                                allData[gameId] = { ...allData[gameId], ...data };
+                                localStorage.setItem(storageKey, JSON.stringify(allData));
+                            } catch (error) {
+                                console.warn('Failed to save game data:', error);
+                            }
+                        }
+                        
+                        // Make functions globally available
+                        window.getGameData = getGameData;
+                        window.saveGameData = saveGameData;
+                        
+                        // Auto-save functionality for common game patterns
+                        let autoSaveInterval;
+                        
+                        function startAutoSave() {
+                            if (autoSaveInterval) clearInterval(autoSaveInterval);
+                            
+                            autoSaveInterval = setInterval(() => {
+                                // Try to find and save common game data patterns
+                                const gameState = {};
+                                
+                                // Look for common game variables
+                                if (typeof window.game !== 'undefined') {
+                                    gameState.game = window.game;
+                                }
+                                if (typeof window.score !== 'undefined') {
+                                    gameState.score = window.score;
+                                }
+                                if (typeof window.level !== 'undefined') {
+                                    gameState.level = window.level;
+                                }
+                                if (typeof window.lives !== 'undefined') {
+                                    gameState.lives = window.lives;
+                                }
+                                if (typeof window.coins !== 'undefined') {
+                                    gameState.coins = window.coins;
+                                }
+                                if (typeof window.progress !== 'undefined') {
+                                    gameState.progress = window.progress;
+                                }
+                                
+                                // Save localStorage data
+                                const localData = {};
+                                for (let i = 0; i < localStorage.length; i++) {
+                                    const key = localStorage.key(i);
+                                    if (key && !key.startsWith('bored_')) {
+                                        localData[key] = localStorage.getItem(key);
+                                    }
+                                }
+                                
+                                if (Object.keys(gameState).length > 0 || Object.keys(localData).length > 0) {
+                                    saveGameData({
+                                        gameState: gameState,
+                                        localStorage: localData,
+                                        timestamp: Date.now()
+                                    });
+                                }
+                            }, 5000); // Auto-save every 5 seconds
+                        }
+                        
+                        // Restore game data on load
+                        function restoreGameData() {
+                            const data = getGameData();
+                            
+                            if (data.localStorage) {
+                                // Restore localStorage data
+                                Object.entries(data.localStorage).forEach(([key, value]) => {
+                                    try {
+                                        localStorage.setItem(key, value);
+                                    } catch (error) {
+                                        console.warn('Failed to restore localStorage item:', key, error);
+                                    }
+                                });
+                            }
+                            
+                            if (data.gameState) {
+                                // Restore game state variables
+                                Object.entries(data.gameState).forEach(([key, value]) => {
+                                    try {
+                                        window[key] = value;
+                                    } catch (error) {
+                                        console.warn('Failed to restore game state:', key, error);
+                                    }
+                                });
+                            }
+                        }
+                        
+                        // Initialize when DOM is ready
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', () => {
+                                restoreGameData();
+                                startAutoSave();
+                            });
+                        } else {
+                            restoreGameData();
+                            startAutoSave();
+                        }
+                        
+                        // Also try to restore after a short delay for games that load asynchronously
+                        setTimeout(() => {
+                            restoreGameData();
+                        }, 1000);
+                        
+                        console.log('Game data persistence loaded for:', gameId);
+                    })();
+                `;
+
+                try {
+                    iframe.contentWindow.eval(script);
+                } catch (error) {
+                    console.warn('Failed to inject data persistence script:', error);
+                }
+            }
+        }
+
+        // Initialize game data manager
+        const gameDataManager = new GameDataManager();
+
+        // Enhanced game modal function with data persistence
+        function openGameModalWithPersistence(gameFile, title) {
+            gameModalTitle.textContent = title;
+            gameIframe.src = gameFile;
+            gameModal.classList.add('show');
+            
+            // Hide fullscreen button for slope game
+            const fullscreenBtn = document.getElementById('game-fullscreen-btn');
+            if (gameFile.includes('slope/index.html')) {
+                fullscreenBtn.style.display = 'none';
+            } else {
+                fullscreenBtn.style.display = 'flex';
+            }
+            
+            // Inject data persistence when iframe loads
+            gameIframe.addEventListener('load', () => {
+                const gameId = gameFile.replace(/[^a-zA-Z0-9]/g, '_');
+                gameDataManager.injectDataPersistence(gameIframe, gameId);
+            });
+            
+            showNotification(`Opening ${title}...`, 'success');
+        }
+
+        // Override the original openGameModal function
+        window.openGameModal = openGameModalWithPersistence;
+
+        // Add data management UI
+        function addDataManagementUI() {
+            const dataControls = document.createElement('div');
+            dataControls.className = 'data-management-controls';
+            dataControls.innerHTML = `
+                <button class="data-clear-btn" onclick="clearAllGameData()" title="Clear all saved game data">
+                    <i class="fas fa-trash"></i>
+                    Clear Data
+                </button>
+                <button class="data-export-btn" onclick="exportGameData()" title="Export game data">
+                    <i class="fas fa-upload"></i>
+                    Export
+                </button>
+                <button class="data-import-btn" onclick="importGameData()" title="Import game data">
+                    <i class="fas fa-download"></i>
+                    Import
+                </button>
+            `;
+            
+            // Add to games container header
+            const gamesHeader = document.querySelector('#games-container .content-header');
+            if (gamesHeader) {
+                gamesHeader.appendChild(dataControls);
+            }
+        }
+
+        // Data management functions
+        function clearAllGameData() {
+            if (confirm('Are you sure you want to clear all saved game data? This cannot be undone.')) {
+                gameDataManager.clearGameData();
+                showNotification('All game data cleared', 'info');
+            }
+        }
+
+        function exportGameData() {
+            try {
+                const data = gameDataManager.gameData;
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'bored_game_data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('Game data exported successfully', 'success');
+            } catch (error) {
+                showNotification('Failed to export game data', 'error');
+            }
+        }
+
+        function importGameData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            gameDataManager.gameData = data;
+                            gameDataManager.saveGameData();
+                            showNotification('Game data imported successfully', 'success');
+                        } catch (error) {
+                            showNotification('Failed to import game data - invalid file', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Make functions globally available
+        window.clearAllGameData = clearAllGameData;
+        window.exportGameData = exportGameData;
+        window.importGameData = importGameData;
+
+        // Initialize data management UI when games section is opened
+        const originalOpenSection = window.openSection;
+        window.openSection = function(sectionName) {
+            originalOpenSection(sectionName);
+            if (sectionName === 'games') {
+                setTimeout(addDataManagementUI, 100);
+            }
+        };
+
         // Initialize
         console.log('BORED - Modern Hub Loaded Successfully!');
+        console.log('Game data persistence system initialized');
     </script>
 </body>
 </html>
